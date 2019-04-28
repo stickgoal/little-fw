@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans>
+
+    <bean id="userDAO" class="me.maiz.app.little.littlespring.test.UserDAOImpl">
+        <property name="name" value="hello"/>
+    </bean>
+    <bean id="userService" class="me.maiz.app.little.littlespring.test.UserServiceImpl">
+        <property name="adminName" value="super"/>
+        <property name="userDAO" ref="userDAO"/>
+    </bean>
+
+</beans>
