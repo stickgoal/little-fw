@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<littlemvc>
+
+    <component-scan base-package="me.maiz.test.abc"/>
+
+    <!-- 视图解析器：viewResolver -->
+    <view-resolver >
+        <prefix value="/WEB-INF/pages/"/>
+        <suffix value=".jsp"/>
+    </view-resolver>
+
+</littlemvc>
