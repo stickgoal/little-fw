@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <littlemvc>
 
-    <component-scan base-package="me.maiz.test.abc"/>
+    <component-scan base-package="me.maiz.app.little.main"/>
 
     <!-- 视图解析器：viewResolver -->
     <view-resolver >

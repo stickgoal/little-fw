@@ -1,4 +1,4 @@
-package me.maiz.app.little.config;
+package me.maiz.app.little.util;
 
 import java.io.File;
 import java.io.IOException;
