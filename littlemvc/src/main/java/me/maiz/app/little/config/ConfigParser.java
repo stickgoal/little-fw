@@ -20,6 +20,7 @@ public class ConfigParser {
             if (!configFile.startsWith("/")){
                 configFile = "/"+configFile;
             }
+            log.info("准备解析配置文件 {}",configFile);
             Document configDoc = reader.read(this.getClass().getResourceAsStream(configFile));
 
             Element root = configDoc.getRootElement();

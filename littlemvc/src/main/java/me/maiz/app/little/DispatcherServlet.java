@@ -1,9 +1,8 @@
 package me.maiz.app.little;
 
-import me.maiz.app.little.annotations.LittleController;
-import me.maiz.app.little.annotations.LittleRequestMapping;
-import me.maiz.app.little.annotations.LittleRequestParam;
-import me.maiz.app.little.annotations.RequestMethod;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import me.maiz.app.little.annotations.*;
 import me.maiz.app.little.config.ConfigParser;
 import me.maiz.app.little.config.Configuration;
 import me.maiz.app.little.util.PackageScan;
@@ -83,11 +82,16 @@ public class DispatcherServlet extends HttpServlet {
             Map<Class<?>, Object> systemParams = setSystemParam(req, resp, modelMap);
 
             //执行调用
-            final Object viewName = handleMethod.invoke(controller, getParam(handleMethod, systemParams));
+            final Object result = handleMethod.invoke(controller, getParam(handleMethod, systemParams));
 
             //视图解析和跳转
-            if (viewName instanceof String) {
-                String fullView = resolveView(viewName);
+            final boolean isResponseBody = handleMethod.isAnnotationPresent(LittleResponseBody.class);
+            if (isResponseBody) {
+                final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+                final String json = gson.toJson(result);
+                resp.getWriter().write(json);
+            } else {
+                String fullView = resolveView(result.toString());
                 //将modelMap中的值转存到请求中，便于在页面上使用
                 for (String k : modelMap.keySet()) {
                     req.setAttribute(k, modelMap.get(k));
@@ -95,9 +99,8 @@ public class DispatcherServlet extends HttpServlet {
                 //跳转到页面
                 req.getRequestDispatcher(fullView).forward(req, resp);
 
-            } else {
-                //TODO json 转换支持
             }
+
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("调用处理方法失败", e);
         }
@@ -153,7 +156,7 @@ public class DispatcherServlet extends HttpServlet {
                 }
                 //处理字符串参数
                 if (paramType == String.class) {
-                    params.add(paramValue[0]);
+                    params.add(paramValue != null ? paramValue[0] : null);
                 } else {
                     //TODO 参数类型转换
                 }
@@ -193,7 +196,7 @@ public class DispatcherServlet extends HttpServlet {
                 }
             }
         }
-        logger.info("扫描注解完成 \ncontroller实例：{}\n 请求映射：{}",controllerInstanceMap,urlHandlerMethodMapping);
+        logger.info("扫描注解完成 \ncontroller实例：{}\n 请求映射：{}", controllerInstanceMap, urlHandlerMethodMapping);
     }
 
     /**

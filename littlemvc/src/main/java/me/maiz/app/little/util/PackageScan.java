@@ -67,7 +67,6 @@ public class PackageScan {
                 classes.addAll(findClasses(file, packageName + "." + file.getName(), annoClass));
             } else if (file.getName().endsWith(".class")) {
 
-
                 final Class<?> aClass = Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
                 if (aClass.isAnnotationPresent(annoClass)) {
                     classes.add(aClass);

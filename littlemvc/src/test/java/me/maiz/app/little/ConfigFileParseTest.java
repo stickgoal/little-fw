@@ -15,7 +15,7 @@ public class ConfigFileParseTest {
     @Test
     public void testConfig(){
         ConfigParser configParser = new ConfigParser();
-        final Configuration configuration = configParser.parse("/mvc.xml");
+        final Configuration configuration = configParser.parse("mvc.xml");
         assertNotNull(configuration);
         assertNotNull(configuration.getBasePackage());
         assertNotNull(configuration.getViewPrefix());

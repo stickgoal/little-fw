@@ -24,6 +24,5 @@ public class AppTest
             System.out.println(method.getParameters()[0].getName());
         }
 
-
     }
 }
