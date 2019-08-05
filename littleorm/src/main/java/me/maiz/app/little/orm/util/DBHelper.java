@@ -69,7 +69,7 @@ public class DBHelper {
 		}
 	}
 	
-	public <T> T queryOne(String sql, Extractor<T> extractor, Object... params) {
+	public <T> T queryOne(String sql, Transformer<T> extractor, Object... params) {
 		 List<T> t = query(sql,extractor,params);
 		 if( t.size()!=0 && t.size()>1) {
 			 throw new RuntimeException("查询结果数据量不符合预期");
@@ -85,7 +85,7 @@ public class DBHelper {
 	 * @param params
 	 * @return
 	 */
-	public <T> List<T> query(String sql, Extractor<T> extractor, Object... params) {
+	public <T> List<T> query(String sql, Transformer<T> extractor, Object... params) {
 		List<T> resultList = new ArrayList<T>();
 		PreparedStatement pstmt = null;
 		try {
@@ -101,9 +101,12 @@ public class DBHelper {
 			
 		} catch (SQLException e) {
 			throw new RuntimeException("SQL异常", e);
+
 		} finally {
+
 			closePreparedStatement(pstmt);
 		}
+
 		return resultList;
 	}
 	
@@ -164,7 +167,7 @@ public class DBHelper {
 	 *
 	 * @param <T>
 	 */
-	public static interface Extractor<T> {
+	public static interface Transformer<T> {
 		/**
 		 * 将ResultSet中的数据转换成List
 		 * 

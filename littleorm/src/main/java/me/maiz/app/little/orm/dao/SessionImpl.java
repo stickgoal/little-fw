@@ -1,5 +1,6 @@
 package me.maiz.app.little.orm.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import me.maiz.app.little.orm.exceptions.EntityNotManagedException;
 import me.maiz.app.little.orm.exceptions.PersistException;
 import me.maiz.app.little.orm.meta.model.ColumnMapping;
@@ -11,14 +12,16 @@ import org.apache.commons.beanutils.BeanUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
+@Slf4j
 public class SessionImpl implements Session {
 
     private SessionFactory sessionFactory;
+
+    private DBHelper dbHelper = new DBHelper();
 
     SessionImpl(SessionFactory sessionFactory){
 
@@ -28,12 +31,11 @@ public class SessionImpl implements Session {
     @Override
     public int save(Object instance) {
 
+        dbHelper = new DBHelper();
+
         String entityName = instance.getClass().getSimpleName();
 
-        final Mapping mapping = sessionFactory.metaMap.get(entityName);
-        if(mapping==null){
-            throw new EntityNotManagedException(entityName+"未被管理");
-        }
+        final Mapping mapping = getMapping(entityName);
 
         try {
             //将对象转换为map形式的信息map
@@ -43,12 +45,22 @@ public class SessionImpl implements Session {
 
             Object[] params = getParams(mapping.getColumnMappings(),beanValues);
 
-            return  new DBHelper().add(insertSql,params);
+            return  dbHelper.add(insertSql,params);
 
 
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
            throw new PersistException("持久化失败",e);
+        }finally{
+            dbHelper.cleanup();
         }
+    }
+
+    private Mapping getMapping(String entityName) {
+        final Mapping mapping = sessionFactory.metaMap.get(entityName);
+        if(mapping==null){
+            throw new EntityNotManagedException(entityName+"未被管理");
+        }
+        return mapping;
     }
 
     private Object[] getParams(List<ColumnMapping> columnMappings, Map<String, String> beanValues) {
@@ -58,16 +70,6 @@ public class SessionImpl implements Session {
         }
         return params.toArray();
     }
-
-    private List<String> transform(Set<String> strings) {
-        List<String> columns = new ArrayList<>();
-        for (String prop : strings) {
-            columns.add(StringUtil.camelCaseToUnderScore(prop));
-        }
-        return columns;
-    }
-
-
 
     @Override
     public int delete(Object instance) {
@@ -80,12 +82,61 @@ public class SessionImpl implements Session {
     }
 
     @Override
-    public <T> T get(Class<T> entityType, Serializable id) {
-        return null;
+    public void beginTransaction() {
+
+    }
+
+    @Override
+    public void commit() {
+
+    }
+
+    @Override
+    public void rollback() {
+
+    }
+
+
+
+    @Override
+    public <T> T get(final Class<T> entityType, Object id) {
+
+        final Mapping mapping = getMapping(entityType.getSimpleName());
+        final DBHelper.Transformer<Object> transformer = new DBHelper.Transformer<Object>() {
+
+            @Override
+            public Object extract(ResultSet rs) throws SQLException {
+                Object instance = null;
+                try {
+                    instance = entityType.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException("实例化异常", e);
+                }
+                final ResultSetMetaData resultSetMetaData = rs.getMetaData();
+                for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                    final String columnName = resultSetMetaData.getColumnName(i);
+                    try {
+                        //设置值，约定为 下划线风格 => 驼峰式风格
+                        BeanUtils.setProperty(instance, StringUtil.underScoreToCamelCase(columnName), rs.getObject(i));
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException("设置"+columnName+"值出错",e);
+                    }
+                }
+
+                return instance;
+            }
+        };
+
+        final List<Object> resultObj = dbHelper.query(SqlGenerator.byId(mapping), transformer, id);
+
+        return resultObj!=null?(T)resultObj.get(0):null;
     }
 
     @Override
     public <T> List<T> createQuery(Class<T> entityType, String sql, Object... param) {
+
+
+
         return null;
     }
 

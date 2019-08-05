@@ -11,7 +11,9 @@ import me.maiz.app.little.orm.meta.model.Mapping;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class MetaExtractor {
@@ -27,29 +29,14 @@ public class MetaExtractor {
         mapping.setEntityClass(entityClass);
         mapping.setTableName(entityAnno.tableName());
         List<ColumnMapping> columnMappings = new ArrayList<>();
+        Map<String,ColumnMapping> columnNameMapping = new HashMap<>();
 
 
         Field[] declaredFields = entityClass.getDeclaredFields();
         for (Field field : declaredFields) {
+            ColumnMapping cm = new ColumnMapping();
 
-            if (field.isAnnotationPresent(Id.class)) {
-
-                ColumnMapping cm = new ColumnMapping();
-
-                cm.setPk(true);
-                Id idAnno = field.getAnnotation(Id.class);
-
-                cm.setProperty(field.getName());
-                cm.setPropertyType(field.getType());
-                cm.setColumn(idAnno.idName());
-                cm.setColumnType(getJDBCType(field.getType()));
-
-                mapping.setPkName(idAnno.idName());
-                mapping.setPkType(field.getType());
-
-                columnMappings.add(cm);
-            } else if (field.isAnnotationPresent(Column.class)) {
-                ColumnMapping cm = new ColumnMapping();
+           if (field.isAnnotationPresent(Column.class)) {
 
                 Column columnAnno = field.getAnnotation(Column.class);
 
@@ -59,10 +46,22 @@ public class MetaExtractor {
                 cm.setColumnType(getJDBCType(field.getType()));
 
                 columnMappings.add(cm);
+                columnNameMapping.put(columnAnno.columnName(),cm);
+
+               if (field.isAnnotationPresent(Id.class)) {
+                   cm.setPk(true);
+
+                   mapping.setPkName(columnAnno.columnName());
+                   mapping.setPkType(field.getType());
+
+               }
             } else {
-                log.warn("[" + field + "]没有被@Id或者@Column注解，忽略");
+                log.warn("[" + field + "]没有被@Column注解，忽略");
             }
         }
+
+        mapping.setColumnNameMapping(columnNameMapping);
+        mapping.setColumnMappings(columnMappings);
 
         return mapping;
     }

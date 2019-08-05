@@ -35,4 +35,12 @@ public class AppTest
         assertEquals("look_back_now",StringUtil.camelCaseToUnderScore("LookBackNow"));
         assertEquals("look_back_now_n",StringUtil.camelCaseToUnderScore("LookBackNowN"));
     }
+    @Test
+    public void testUnderscoreTransform(){
+        assertEquals("lookBack",StringUtil.underScoreToCamelCase("look_back"));
+        assertEquals("lookBackNow",StringUtil.underScoreToCamelCase("look_back_now"));
+        assertEquals("lookBackNow",StringUtil.underScoreToCamelCase("look_back_now_"));
+        assertEquals("lookBackNow",StringUtil.underScoreToCamelCase("_look_back_now_"));
+
+    }
 }

@@ -28,13 +28,28 @@ public interface Session {
     public int update(Object instance);
 
     /**
+     * 开始事务
+     */
+    public void beginTransaction();
+
+    /**
+     * 提交事务
+     */
+    public void commit();
+
+    /**
+     * 回滚
+     */
+    public void rollback();
+
+    /**
      * 根据ID查询
      * @param entityType
      * @param id
      * @param <T>
      * @return
      */
-    <T> T get(Class<T> entityType, Serializable id);
+    <T> T get(Class<T> entityType, Object id);
 
     /**
      * 根据语句执行查询

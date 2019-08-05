@@ -15,4 +15,27 @@ public class StringUtil {
         }
         return sb.toString();
     }
+
+
+    public static String underScoreToCamelCase(String src) {
+        if(src.startsWith("_")){
+            src=src.substring(1,src.length());
+        }
+        if(src.endsWith("_")){
+            src=src.substring(0,src.length()-1);
+        }
+        final String[] splited = src.split("_");
+        StringBuilder strBuilder=new StringBuilder();
+
+        for (int i = 0; i < splited.length; i++) {
+            final String current = splited[i];
+            if(i!=0){
+                strBuilder.append(""+Character.toUpperCase(current.charAt(0)));
+                strBuilder.append(current, 1, current.length());
+            }else{
+                strBuilder.append(current);
+            }
+        }
+        return strBuilder.toString();
+    }
 }

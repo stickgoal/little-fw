@@ -1,5 +1,6 @@
 package me.maiz.app.little.orm.dao;
 
+import lombok.extern.slf4j.Slf4j;
 import me.maiz.app.little.orm.meta.MetaExtractor;
 import me.maiz.app.little.orm.meta.model.Configuration;
 import me.maiz.app.little.orm.meta.model.Mapping;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
+@Slf4j
 public class SessionFactory {
 
     //配置文件位置
@@ -69,7 +70,7 @@ public class SessionFactory {
         Properties p = new Properties();
 
         try {
-            in = new BufferedInputStream(new FileInputStream(configLocation));
+            in = this.getClass().getResourceAsStream(configLocation);
             p.load(in);
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,14 +83,26 @@ public class SessionFactory {
         configuration.setDialect(p.getProperty("orm.sql.dialect"));
         configuration.setEntityPackage(p.getProperty("orm.entityPackage"));
 
-
+        log.info("配置解析完成{}",configuration);
     }
 
     public Session openSession() {
         return new SessionImpl(this);
     }
 
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
+    public Map<String, Mapping> getMetaMap() {
+        return metaMap;
+    }
 
-
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("配置=>").append(configuration).append("\n 实体类信息=>")
+                .append(metaMap);
+        return sb.toString();
+    }
 }

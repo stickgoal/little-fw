@@ -74,7 +74,7 @@ public class PackageScan {
             }
         }
 
-        return null;
+        return classes;
     }
 
 

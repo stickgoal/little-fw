@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 表和实体的映射信息信息
@@ -35,5 +36,10 @@ public class Mapping {
      * 列映射列表
      */
     private List<ColumnMapping> columnMappings;
+
+    /**
+     * 持有从 字段名=>列映射对象的 对应关系
+     */
+    private Map<String,ColumnMapping> columnNameMapping;
 
 }
