@@ -13,3 +13,5 @@ buildNumber.properties
 littlemvc/.idea/
 littleorm/.idea/
 littlespring/.idea/
+*.iml
+target/
